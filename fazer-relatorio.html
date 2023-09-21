@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <link rel="shortcut icon" href="assets/icon.png" type="image/x-icon">
+    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inicio - Portal BOPE</title>
+</head>
+<body>
+    <div class="off-login">
+        <img src="assets/logo.svg" alt="">
+    </div>
+    <div class="home-container" style="display: none;">
+        <div class="header">
+            <div class="left-header">
+                <a href="home.html"><img src="assets/logotipo.svg" alt=""></a>
+            </div>
+            <div class="right-header">
+                <button id="logoff">Fazer Logoff</button>
+            </div>
+        </div>
+        <div class="show2">
+            <div id="questionnaire">
+                <form id="contactForm" onsubmit="sendRelatorioPtr(event)">
+                    <h1 style="font-size: 2rem;">RELATÓRIO DE PATRULHA - BOPE</h1>
+                    <p>USE CORRETAMENTE ESTE CANAL!</p>
+                    <div class="question">
+                        <span>NOME e ID (Ex: Luydi Passarin | 1430)
+                        </span><br>
+                        <input type="text" id="avaliador" required placeholder="Sua Resposta">
+                    </div>
+                    <div class="question">
+                        <span>Data da Patrulha (Ex: 22/05/23)
+                        </span><br>
+                        <input type="text" id="data" required placeholder="Sua Resposta">
+                    </div>
+                    <div class="question">
+                        <span>Ocorrência
+                        </span><br>
+                        <input type="text" id="ocorrencia" required placeholder="Sua Resposta">
+                    </div>
+                    <div class="question">
+                        <span>Horário Inicio
+                        </span><br>
+                        <input type="text" id="horarioPTR" required placeholder="Sua Resposta">
+                    </div>
+                    <div class="question">
+                        <span>Horário Fim
+                        </span><br>
+                        <input type="text" id="horarioPTR2" required placeholder="Sua Resposta">
+                    </div>
+                    <div class="question">
+                        <span>Evidência (Envie um arquivo)
+                        </span><br>
+                        <input type="file" id="evidencia" required accept="image/*,application/pdf" />
+                    </div>
+                    <div class="question">
+                        <span>Observações. (Escreva um breve relato de como foi a sua patrulha como caveira!)</span><br>
+                        <input type="text" id="observacao" placeholder="Digite sua Observação">
+                    </div>
+                    <button type="submit">Finalizar Relatório</button>
+                </form>
+        </div>
+    </div>
+</body>
+<script src="jquery.js"></script>
+<script
+  src="https://code.jquery.com/jquery-3.7.1.js"
+  integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
+  crossorigin="anonymous"></script>
+</html>
+<script>
+// Verifica se o usuário está logado
+if (!localStorage.getItem('logadoBope')) {
+    // Se não estiver logado, redireciona para a página index.html
+    window.location.href = "index.html";
+}else if(localStorage.getItem('logadoBope')){
+    $('.home-container').css('display','flex');
+    $('.off-login').css('display','none');
+}
+
+// Função para fazer logoff
+function fazerLogoff() {
+    // Remove a chave 'logadoBope' do localStorage
+    localStorage.removeItem('logadoBope');
+    
+    // Redireciona para a página index.html
+    window.location.href = "index.html";
+}
+
+// Adicione um evento de clique ao elemento com o id #logoff
+document.getElementById('logoff').addEventListener('click', fazerLogoff);
+</script>
+<script>
+async function sendContact(ev) {
+    ev.preventDefault();
+    
+    // Obtenha os valores dos campos do formulário
+    var avaliador = document.getElementById('avaliador').value;
+    var ocorrencia = document.getElementById('ocorrencia').value;
+    var horarioPTR = document.getElementById('horarioPTR').value;
+    var horarioPTR2 = document.getElementById('horarioPTR2').value;
+    var observacao = document.getElementById('observacao').value;
+    var evidenciaInput = document.getElementById('evidencia');
+    var evidenciaFile = evidenciaInput.files[0]; // Obtém o arquivo selecionado
+
+    if (avaliador != "" || ocorrencia != "" || horarioPTR != "" || horarioPTR2 != "") {
+        var formattedMessage = `**Relatório de Patrulha - BOPE**
+Funcional: ${avaliador}
+Ocorrência: ${ocorrencia}
+Horário Início: ${horarioPTR}
+Horário Fim: ${horarioPTR2}
+
+Observações: ${observacao}
+Evidência:`;
+        
+        var webhookBody = new FormData(); // Crie um objeto FormData para enviar dados e arquivos
+
+        webhookBody.append('content', formattedMessage); // Use 'content' para o corpo da mensagem em Markdown
+        webhookBody.append('evidencia', evidenciaFile); // Adicione o arquivo ao FormData
+
+        const webhookUrl = 'https://discordapp.com/api/webhooks/1154496825529737307/yv4aB95vwt47xTiDvQyBwKBt7nYmDgBCd5T4_Kl54K-RMk_rYsNz4LSvwKZhwx3W5hTK';
+
+        const response = await fetch(webhookUrl, {
+            method: 'POST',
+            body: webhookBody,
+        });
+
+        if (response.ok) {
+            alert('Parabéns, relatório de patrulha enviado com sucesso! Até a próxima!');
+        } else {
+            alert('Houve um erro! Tente novamente mais tarde!');
+        }
+    }
+}
+
+const contactForm = document.getElementById('contactForm');
+contactForm.addEventListener('submit', sendContact);
+</script>
